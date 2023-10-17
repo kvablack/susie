@@ -8,4 +8,5 @@ tensorflow==2.13.0
 ml-collections==0.1.0
 jax==0.4.11
 optax==0.1.5
-
+diffusers==0.18.2
+ml-dtypes==0.2.0

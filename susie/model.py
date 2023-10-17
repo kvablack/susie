@@ -1,7 +1,7 @@
 import os
 import time
 from functools import partial
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Optional, Tuple
 
 import einops as eo
 import jax
@@ -147,6 +147,10 @@ def load_pretrained_unet(
         path, dtype=np.float32, subfolder="unet"
     )
 
+    # same issue, they commit the params to the CPU, which totally messes stuff
+    # up downstream...
+    params = jax.device_get(params)
+
     # add extra parameters to conv_in if necessary
     old_conv_in = params["conv_in"]["kernel"]
     h, w, cin, cout = old_conv_in.shape
@@ -159,30 +163,51 @@ def load_pretrained_unet(
     # params["conv_in"]["kernel"] = np.repeat(old_conv_in, in_channels // cin, axis=2)
     # params["conv_in"]["kernel"] /= in_channels / cin
 
+    # monkey-patch __call__ to use channels-last
+    model_def.__call__ = lambda self, sample, *args, **kwargs: eo.rearrange(
+        FlaxUNet2DConditionModel.__call__(
+            self, eo.rearrange(sample, "b h w c -> b c h w"), *args, **kwargs
+        ).sample,
+        "b c h w -> b h w c",
+    )
+
     return model_def, params
 
 
 def create_sample_fn(
     path: str,
-    wandb_run_name: str,
-    num_timesteps: int,
-    prompt_w: float,
-    context_w: float,
-    eta: float,
-    pretrained_path: str,
+    wandb_run_name: Optional[str] = None,
+    num_timesteps: int = 50,
+    prompt_w: float = 7.5,
+    context_w: float = 2.5,
+    eta: float = 0.0,
+    pretrained_path: str = "runwayml/stable-diffusion-v1-5:flax",
 ) -> Callable[[np.ndarray, str], np.ndarray]:
-    assert os.path.exists(path)
-    # load config from wandb
-    api = wandb.Api()
-    run = api.run(wandb_run_name)
-    config = ml_collections.ConfigDict(run.config)
+    if (
+        os.path.exists(path)
+        and os.path.isdir(path)
+        and "checkpoint" in os.listdir(path)
+    ):
+        # this is an orbax checkpoint
+        assert wandb_run_name is not None
+        # load config from wandb
+        api = wandb.Api()
+        run = api.run(wandb_run_name)
+        config = ml_collections.ConfigDict(run.config)
 
-    # load params
-    params = orbax.checkpoint.PyTreeCheckpointer().restore(path, item=None)
-    assert "params_ema" not in params
+        # load params
+        params = orbax.checkpoint.PyTreeCheckpointer().restore(path, item=None)
+        assert "params_ema" not in params
 
-    # load model
-    model_def = create_model_def(config.model)
+        # load model
+        model_def = create_model_def(config.model)
+    else:
+        # assume this is in HuggingFace format
+        model_def, params = load_pretrained_unet(path, in_channels=8)
+
+        # hardcode scheduling config to be "scaled_linear" (used by Stable Diffusion)
+        config = {"scheduling": {"noise_schedule": "scaled_linear"}}
+
     state = EmaTrainState(
         step=0,
         apply_fn=model_def.apply,
@@ -198,12 +223,12 @@ def create_sample_fn(
     tokenize, untokenize, text_encode = load_text_encoder(pretrained_path)
     uncond_prompt_embed = text_encode(tokenize([""]))  # (1, 77, 768)
 
-    log_snr_fn = scheduling.create_log_snr_fn(config.scheduling)
+    log_snr_fn = scheduling.create_log_snr_fn(config["scheduling"])
     sample_loop = partial(sampling.sample_loop, log_snr_fn=log_snr_fn)
 
     rng = jax.random.PRNGKey(int(time.time()))
 
-    def sample(state, image, prompt, prompt_w=prompt_w, context_w=context_w):
+    def sample(image, prompt, prompt_w=prompt_w, context_w=context_w):
         nonlocal rng
 
         image = image / 127.5 - 1.0
@@ -234,4 +259,4 @@ def create_sample_fn(
 
         return jax.device_get(samples[0])
 
-    return partial(sample, state)
+    return sample

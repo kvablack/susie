@@ -197,12 +197,12 @@ def sample_loop(
         )
         return (rng, x, x0), None
 
-    if y.shape[-1] % 3 == 0:
-        # full images
-        channel_dim = 3
-    elif y.shape[-1] % 4 == 0:
+    if y.shape[-1] % 4 == 0:
         # vae-encoded
         channel_dim = 4
+    elif y.shape[-1] % 3 == 0:
+        # full images
+        channel_dim = 3
     else:
         raise ValueError(f"Invalid channel dimension {y.shape[-1]}")
 

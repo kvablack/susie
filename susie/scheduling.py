@@ -71,7 +71,7 @@ def create_log_snr_fn(config):
     used to condition the neural network as well as compute the mean and stdev of the
     diffusion process.
     """
-    schedule_name = config.noise_schedule
+    schedule_name = config["noise_schedule"]
 
     if schedule_name == "linear":
         log_snr_fn = linear_log_snr
