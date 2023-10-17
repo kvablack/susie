@@ -7,3 +7,5 @@ wandb==0.15.5
 tensorflow==2.13.0
 ml-collections==0.1.0
 jax==0.4.11
+optax==0.1.5
+
