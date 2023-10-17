@@ -1,0 +1,9 @@
+distrax==0.1.2
+flax==0.7.0
+transformers==4.33.1
+dlimp @ git+https://github.com/kvablack/dlimp@fba663b10858793d35f9a0fdbe8f0d51906c8c90
+einops==0.6.1
+wandb==0.15.5
+tensorflow==2.13.0
+ml-collections==0.1.0
+jax==0.4.11
