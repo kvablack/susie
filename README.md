@@ -13,7 +13,7 @@ For integration with the CALVIN simulator and reproducing our simulated results,
 ## Model Weights
 The UNet weights for our best-performing model, trained on BridgeData and Something-Something for 40k steps, are hosted [on HuggingFace](https://huggingface.co/kvablack/susie). They can be loaded using `FlaxUNet2DConditionModel.from_pretrained("kvablack/susie", subfolder="unet")`. Use with the standard Stable Diffusion v1-5 VAE and text encoder.
 
-Here's a quickstart for sampling using this repo:
+Here's a quickstart for getting out-of-the-box subgoals using this repo:
 ```python
 from susie.model import create_sample_fn
 from susie.jax_utils import initialize_compilation_cache
