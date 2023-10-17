@@ -1,7 +1,7 @@
 distrax==0.1.2
 flax==0.7.0
 transformers==4.33.1
-dlimp @ git+https://github.com/kvablack/dlimp@fba663b10858793d35f9a0fdbe8f0d51906c8c90
+dlimp @ git+https://github.com/kvablack/dlimp@166a1b271b19434c3a04b7cfacce0aa0f27bf413
 einops==0.6.1
 wandb==0.15.5
 tensorflow==2.13.0
