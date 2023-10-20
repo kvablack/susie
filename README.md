@@ -3,7 +3,7 @@ Code for the paper [Zero-Shot Robotic Manipulation With Pretrained Image-Editing
 
 This repository contains the code for training the high-level image-editing diffusion model on video data. For training the low-level policy, head over to the [BridgeData V2](https://github.com/rail-berkeley/bridge_data_v2) repository --- we use the `gc_ddpm_bc` agent, unmodified, with an action prediction horizon of 4 and the `delta_goals` relabeling strategy.
 
-For integration with the CALVIN simulator and reproducing our simulated results, see [our fork of the calvin-sim repo](https://github.com/pranavatreya/calvin-sim).
+For integration with the CALVIN simulator and reproducing our simulated results, see [our fork of the calvin-sim repo](https://github.com/pranavatreya/calvin-sim) and the [corresponding documentation in the BridgeData V2 repository](https://github.com/rail-berkeley/bridge_data_v2/tree/main/experiments/susie/calvin).
 
 - **Creating datasets**: this repo uses [dlimp](https://github.com/kvablack/dlimp) for dataloading. Check out the `scripts/` directory inside dlimp for creating TFRecords in a compatible format.
 - **Installation**: `pip install -r requirements.txt` to install the versions of required packages confirmed to be working with this codebase. Then, `pip install -e .`. Only tested with Python 3.10. You'll also have to manually install Jax for your platform (see the [Jax installation instructions](https://jax.readthedocs.io/en/latest/installation.html)). Make sure you have the Jax version specified in `requirements.txt` (rather than using `--upgrade` as suggested in the Jax docs).
