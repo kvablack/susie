@@ -28,5 +28,8 @@ IMAGE_URL = "https://rail.eecs.berkeley.edu/datasets/bridge_release/raw/bridge_d
 sample_fn = create_sample_fn("kvablack/susie")
 image = np.array(Image.open(requests.get(IMAGE_URL, stream=True).raw).resize((256, 256)))
 image_out = sample_fn(image, "open the drawer")
+
+# to display the images if you're in a Jupyter notebook
+display(Image.fromarray(image))
 display(Image.fromarray(image_out))
 ```

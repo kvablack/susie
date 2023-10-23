@@ -8,9 +8,9 @@ def base():
 
     # top-level stuff
     config.seed = 42
-    config.wandb_project = ""
+    config.wandb_project = "susie"
     config.run_name = ""
-    config.logdir = "log"
+    config.logdir = "logs"
     config.num_steps = 40000
     config.log_interval = 100
     config.save_interval = 5000
@@ -127,7 +127,7 @@ def base():
 
     # model
     config.model = model = ConfigDict()
-    config.model.pretrained = "instruct-pix2pix"
+    config.model.pretrained = "kvablack/instruct-pix2pix-flax"
 
     return config
 

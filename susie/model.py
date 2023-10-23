@@ -159,9 +159,6 @@ def load_pretrained_unet(
         (h, w, in_channels, cout), dtype=old_conv_in.dtype
     )
     params["conv_in"]["kernel"][:, :, :cin, :] = old_conv_in
-    # assert in_channels % cin == 0
-    # params["conv_in"]["kernel"] = np.repeat(old_conv_in, in_channels // cin, axis=2)
-    # params["conv_in"]["kernel"] /= in_channels / cin
 
     # monkey-patch __call__ to use channels-last
     model_def.__call__ = lambda self, sample, *args, **kwargs: eo.rearrange(
